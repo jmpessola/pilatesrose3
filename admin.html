@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Admin — Pilates rosé Club</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#FDF5F7;--warm:#F9EDF0;
+  --rose:#E8A0B4;--rose-lt:#f6cbd5;--rose-dk:#C4768A;
+  --brown:#3e2a25;--brown-m:#6B4E48;--mid:#7A5A55;--light:#B09898;
+  --serif:'Cormorant Garamond',Georgia,serif;--sans:'Jost',sans-serif;
+  --green:#6BAF73;--red:#D96B6B;--yellow:#D4A245;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:#f5f0f1;color:var(--brown);min-height:100vh}
+
+/* LOGIN */
+#login-screen{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,var(--brown) 0%,var(--brown-m) 100%);
+}
+.login-box{background:var(--cream);border-radius:24px;padding:48px;width:100%;max-width:360px;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.3)}
+.login-box img{height:60px;margin-bottom:20px}
+.login-box h2{font-family:var(--serif);font-size:28px;font-weight:300;color:var(--brown);margin-bottom:6px}
+.login-box p{font-size:13px;color:var(--light);margin-bottom:28px}
+.li{width:100%;padding:13px 16px;border:1.5px solid #EDE0E3;border-radius:11px;background:#fff;font-family:var(--sans);font-size:14px;color:var(--brown);outline:none;margin-bottom:14px;transition:border-color .3s}
+.li:focus{border-color:var(--rose-dk)}
+.lbtn{width:100%;padding:14px;background:var(--brown);color:var(--rose-lt);border:none;border-radius:40px;font-family:var(--sans);font-size:12px;font-weight:500;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.lbtn:hover{background:var(--rose-dk);color:#fff}
+.lerr{font-size:12px;color:var(--red);margin-top:10px;display:none}
+
+/* DASHBOARD */
+#dashboard{display:none;min-height:100vh}
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;width:220px;
+  background:var(--brown);padding:24px 0;z-index:100;
+}
+.sb-logo{padding:0 24px 24px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-logo img{height:44px;opacity:.8}
+.sb-nav{padding:20px 0}
+.sb-link{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 24px;font-size:12px;font-weight:500;
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:rgba(246,203,213,.55);cursor:pointer;transition:all .2s;
+  border:none;background:none;width:100%;text-align:left;
+}
+.sb-link:hover,.sb-link.active{color:var(--rose-lt);background:rgba(246,203,213,.08)}
+.sb-link.active{border-left:3px solid var(--rose-dk)}
+.sb-ico{font-size:16px;width:20px;text-align:center}
+.sb-logout{position:absolute;bottom:24px;left:0;right:0;padding:0 24px}
+
+.main{margin-left:220px;padding:36px}
+
+/* HEADER */
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px}
+.page-title{font-family:var(--serif);font-size:32px;font-weight:300;color:var(--brown)}
+.page-title span{font-size:14px;font-family:var(--sans);color:var(--light);font-weight:400;display:block;margin-top:2px}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px}
+.stat-card{background:#fff;border-radius:16px;padding:22px 20px;box-shadow:0 2px 8px rgba(62,42,37,.06)}
+.sc-ico{font-size:24px;margin-bottom:10px}
+.sc-num{font-family:var(--serif);font-size:34px;font-weight:300;color:var(--brown);line-height:1}
+.sc-lbl{font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--light);margin-top:4px}
+
+/* FILTERS */
+.filters{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.filt-btn{background:#fff;border:1.5px solid #EDE0E3;color:var(--mid);font-family:var(--sans);font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;padding:8px 18px;border-radius:30px;cursor:pointer;transition:all .2s}
+.filt-btn:hover,.filt-btn.active{background:var(--brown);color:var(--rose-lt);border-color:var(--brown)}
+.search-box{margin-left:auto;position:relative}
+.search-box input{padding:9px 16px 9px 36px;border:1.5px solid #EDE0E3;border-radius:30px;font-family:var(--sans);font-size:13px;color:var(--brown);background:#fff;outline:none;width:220px;transition:border-color .3s}
+.search-box input:focus{border-color:var(--rose-dk)}
+.search-box::before{content:'🔍';position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:12px;pointer-events:none}
+
+/* TABLE */
+.table-wrap{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(62,42,37,.06)}
+table{width:100%;border-collapse:collapse}
+thead{background:var(--warm)}
+thead th{padding:14px 18px;text-align:left;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--mid)}
+tbody tr{border-bottom:1px solid #F5EEF0;transition:background .2s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--warm)}
+td{padding:14px 18px;font-size:13px;color:var(--brown-m);vertical-align:middle}
+td.td-name{font-weight:600;color:var(--brown)}
+td.td-fecha{font-family:var(--serif);font-size:15px;color:var(--brown)}
+.badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.badge-pend{background:rgba(212,162,69,.15);color:var(--yellow)}
+.badge-conf{background:rgba(107,175,115,.15);color:var(--green)}
+.badge-canc{background:rgba(217,107,107,.15);color:var(--red)}
+.badge-wait{background:rgba(232,160,180,.15);color:var(--rose-dk)}
+.act-btn{background:none;border:1px solid #EDE0E3;border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;transition:all .2s;color:var(--mid);font-family:var(--sans)}
+.act-btn:hover{background:var(--warm)}
+.act-btn.conf:hover{border-color:var(--green);color:var(--green)}
+.act-btn.canc:hover{border-color:var(--red);color:var(--red)}
+.act-btn.wa{background:rgba(37,211,102,.1);border-color:rgba(37,211,102,.3);color:#1a9e50}
+.act-btn.wa:hover{background:rgba(37,211,102,.2)}
+
+
+/* BORRAR HISTORIAL */
+.del-box{background:#fff;border-radius:16px;padding:28px;box-shadow:0 2px 8px rgba(62,42,37,.06);margin-bottom:24px;border-left:4px solid var(--red)}
+.del-box h3{font-family:var(--serif);font-size:22px;font-weight:300;color:var(--brown);margin-bottom:6px}
+.del-box p{font-size:13px;color:var(--light);margin-bottom:20px}
+.del-row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.del-field{display:flex;flex-direction:column;gap:6px}
+.del-field label{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--mid)}
+.del-field input{padding:10px 14px;border:1.5px solid #EDE0E3;border-radius:10px;font-family:var(--sans);font-size:13px;color:var(--brown);background:var(--warm);outline:none}
+.del-field input:focus{border-color:var(--rose-dk)}
+.del-btn{padding:10px 22px;background:var(--red);color:#fff;border:none;border-radius:10px;font-family:var(--sans);font-size:12px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.del-btn:hover{background:#c05555;transform:translateY(-1px)}
+.del-result{margin-top:12px;font-size:13px;color:var(--green);display:none}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:60px 20px;color:var(--light)}
+.empty-ico{font-size:48px;margin-bottom:14px}
+.empty p{font-size:14px}
+
+/* TODAY SECTION */
+.today-slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-bottom:32px}
+.tslot{background:#fff;border-radius:14px;padding:18px;box-shadow:0 2px 8px rgba(62,42,37,.06);border-left:4px solid var(--rose-lt)}
+.tslot.full{border-left-color:var(--red)}
+.tslot.few{border-left-color:var(--yellow)}
+.tslot-h{font-family:var(--serif);font-size:22px;font-weight:300;color:var(--brown);margin-bottom:4px}
+.tslot-info{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--light)}
+.tslot-count{font-size:13px;font-weight:600;color:var(--brown-m);margin-top:8px}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .sidebar{display:none}
+  .main{margin-left:0;padding:20px}
+  .stats-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <img src="logopilates.png" alt="Pilates rosé Club">
+    <h2>Panel de administración</h2>
+    <p>Ingresá tu contraseña</p>
+    <input type="password" class="li" id="pwd" placeholder="Contraseña" onkeypress="if(event.key==='Enter')doLogin()">
+    <button class="lbtn" onclick="doLogin()">Ingresar →</button>
+    <div class="lerr" id="lerr">Contraseña incorrecta</div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sb-logo"><img src="logopilates.png" alt="Pilates rosé Club"></div>
+    <div class="sb-nav">
+      <button class="sb-link active" onclick="showPage('hoy')"><span class="sb-ico">📅</span>Hoy</button>
+      <button class="sb-link" onclick="showPage('reservas')"><span class="sb-ico">📋</span>Reservas</button>
+      <button class="sb-link" onclick="showPage('espera')"><span class="sb-ico">⏳</span>Lista espera</button>
+    </div>
+    <div class="sb-logout">
+      <button class="sb-link" onclick="logout()" style="color:rgba(246,203,213,.35)"><span class="sb-ico">🚪</span>Salir</button>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- HOY -->
+    <div id="page-hoy">
+      <div class="page-header">
+        <div class="page-title">Buenos días, Florencia 🌸<span id="fecha-hoy"></span></div>
+        <button class="filt-btn" onclick="buildAll()">↻ Actualizar</button>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card"><div class="sc-ico">📅</div><div class="sc-num" id="stat-hoy">0</div><div class="sc-lbl">Clases hoy</div></div>
+        <div class="stat-card"><div class="sc-ico">📆</div><div class="sc-num" id="stat-semana">0</div><div class="sc-lbl">Esta semana</div></div>
+        <div class="stat-card"><div class="sc-ico">👥</div><div class="sc-num" id="stat-total">0</div><div class="sc-lbl">Total reservas</div></div>
+        <div class="stat-card"><div class="sc-ico">⏳</div><div class="sc-num" id="stat-espera">0</div><div class="sc-lbl">Lista espera</div></div>
+      </div>
+
+      <!-- Slots de hoy -->
+      <h3 style="font-family:var(--serif);font-size:22px;font-weight:300;color:var(--brown);margin-bottom:16px">Turnos de hoy</h3>
+      <div class="today-slots" id="today-slots"></div>
+
+      <!-- Próximas reservas de hoy -->
+      <h3 style="font-family:var(--serif);font-size:22px;font-weight:300;color:var(--brown);margin-bottom:16px">Alumnas de hoy</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Hora</th><th>Alumna</th><th>WhatsApp</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody id="tabla-hoy"></tbody>
+      </table></div>
+    </div>
+
+    <!-- RESERVAS -->
+    <div id="page-reservas" style="display:none">
+
+      <!-- BORRAR HISTORIAL -->
+      <div class="del-box">
+        <h3>🗑️ Borrar historial por fechas</h3>
+        <p>Eliminá reservas dentro de un rango de fechas. Esta acción no se puede deshacer.</p>
+        <div class="del-row">
+          <div class="del-field">
+            <label>Desde</label>
+            <input type="date" id="del-desde">
+          </div>
+          <div class="del-field">
+            <label>Hasta</label>
+            <input type="date" id="del-hasta">
+          </div>
+          <div class="del-field" style="flex-direction:row;gap:8px;align-items:flex-end">
+            <button class="del-btn" onclick="borrarPorFecha()">Borrar rango</button>
+            <button class="del-btn" onclick="borrarTodo()" style="background:rgba(217,107,107,.4);color:#c05555">Borrar todo</button>
+          </div>
+        </div>
+        <div class="del-result" id="del-result"></div>
+      </div>
+
+      <div class="page-header">
+        <div class="page-title">Todas las reservas<span>Historial completo</span></div>
+      </div>
+      <div class="filters">
+        <button class="filt-btn active" onclick="filtrar('todas',this)">Todas</button>
+        <button class="filt-btn" onclick="filtrar('pendiente',this)">Pendientes</button>
+        <button class="filt-btn" onclick="filtrar('confirmada',this)">Confirmadas</button>
+        <button class="filt-btn" onclick="filtrar('cancelada',this)">Canceladas</button>
+        <div class="search-box"><input type="text" id="buscar" placeholder="Buscar alumna..." oninput="buildTablaReservas()"></div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Fecha</th><th>Hora</th><th>Alumna</th><th>WhatsApp</th><th>Estado</th><th>Registrado</th><th>Acciones</th></tr></thead>
+        <tbody id="tabla-all"></tbody>
+      </table></div>
+    </div>
+
+    <!-- LISTA DE ESPERA -->
+    <div id="page-espera" style="display:none">
+      <div class="page-header">
+        <div class="page-title">Lista de espera<span>Personas esperando un lugar</span></div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Fecha</th><th>Hora</th><th>WhatsApp</th><th>Anotada</th><th>Acciones</th></tr></thead>
+        <tbody id="tabla-espera"></tbody>
+      </table></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──
+const ADMIN_PWD = 'Pilatesrose2026'; // Cambiá esta contraseña
+const API_URL = 'https://script.google.com/macros/s/AKfycbyVPZVPBizDx-FVJsDwf1p8xRx2w0RwKAvo5zoFhg0Q-SM1kuEePAw-ctgTCFWMxhX5/exec';
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const DIAS  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const HORARIOS_DIA = {1:[8,9,10,11,16,17,18,19],2:[8,9,10,11,16,17,18,19],3:[8,9,10,11,16,17,18,19],4:[8,9,10,11,16,17,18,19],5:[8,9,10,11,16,17,18,19],6:[9,10,11]};
+const MAX_CUPO = 8;
+let filtroActual = 'todas';
+
+// ── LOGIN ──
+function doLogin() {
+  const pwd = document.getElementById('pwd').value;
+  if (pwd === ADMIN_PWD) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    buildAll();
+  } else {
+    document.getElementById('lerr').style.display = 'block';
+  }
+}
+function logout() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('pwd').value = '';
+}
+
+// ── DATA ──
+function getBookings() {
+  try { return JSON.parse(localStorage.getItem('prc_bookings') || '[]'); } catch(e) { return []; }
+}
+function saveBookings(bks) { localStorage.setItem('prc_bookings', JSON.stringify(bks)); }
+function getWaitlist() {
+  try { return JSON.parse(localStorage.getItem('prc_wait') || '[]'); } catch(e) { return []; }
+}
+
+function fmtFecha(fecha) {
+  if (!fecha) return '';
+  const p = fecha.split('-');
+  if (p.length < 3) return fecha;
+  const d = new Date(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2]));
+  return DIAS[d.getDay()] + ' ' + d.getDate() + ' ' + MESES[d.getMonth()];
+}
+
+function fmtTs(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  return d.getDate() + '/' + (d.getMonth()+1) + ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+
+function getTodayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+// ── ACTIONS ──
+function confirmar(id) {
+  const bks = getBookings();
+  const b = bks.find(x => x.id === id);
+  if (!b) return;
+  b.estado = 'confirmada';
+  saveBookings(bks);
+  // Actualizar en Google Sheets
+  if (API_URL) {
+    fetch(API_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({action:'update', id: id, estado:'confirmada'})
+    }).catch(function(){});
+  }
+
+  // WA a la alumna
+  const msg = '✅ Hola ' + b.nombre.split(' ')[0] + '! Tu clase de Pilates Reformer del ' + fmtFecha(b.fecha) + ' a las ' + b.hora + ':00 hs está *confirmada*. ¡Te esperamos en Pilates rosé Club! 🌸\nAv. Hipólito Yrigoyen 1665, San Fernando.';
+  if (b.telefono) {
+    const num = b.telefono.replace(/\D/g,'');
+    window.open('https://api.whatsapp.com/send?phone=54' + num.replace(/^0?54?/,'') + '&text=' + encodeURIComponent(msg), '_blank');
+  }
+  buildAll();
+}
+
+function cancelar(id) {
+  if (!confirm('¿Cancelar esta reserva?')) return;
+  const bks = getBookings();
+  const b = bks.find(x => x.id === id);
+  if (b) {
+    b.estado = 'cancelada';
+    saveBookings(bks);
+    // Actualizar en Google Sheets
+    if (API_URL) {
+      fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({action:'update', id: id, estado:'cancelada'})
+      }).catch(function(){});
+    }
+    buildAll();
+  }
+}
+
+function contactarWA(tel, nombre) {
+  const num = (tel||'').replace(/\D/g,'');
+  const msg = 'Hola ' + (nombre||'').split(' ')[0] + '! Te contacto desde Pilates rosé Club 🌸';
+  window.open('https://api.whatsapp.com/send?phone=54' + num.replace(/^0?54?/,'') + '&text=' + encodeURIComponent(msg), '_blank');
+}
+
+function contactarEspera(tel) {
+  const num = (tel||'').replace(/\D/g,'');
+  const msg = '¡Hola! Se liberó un lugar en tu turno de Pilates rosé Club 🌸 ¿Querés reservarlo?';
+  window.open('https://api.whatsapp.com/send?phone=54' + num.replace(/^0?54?/,'') + '&text=' + encodeURIComponent(msg), '_blank');
+}
+
+// ── PAGES ──
+function showPage(id) {
+  ['hoy','reservas','espera'].forEach(function(p) {
+    document.getElementById('page-'+p).style.display = p===id ? '' : 'none';
+  });
+  document.querySelectorAll('.sb-link').forEach(function(el,i) {
+    el.classList.toggle('active', ['hoy','reservas','espera'][i] === id);
+  });
+  buildAll();
+}
+
+function filtrar(f, btn) {
+  filtroActual = f;
+  document.querySelectorAll('.filt-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  buildTablaReservas();
+}
+
+// ── BUILD ──
+function buildAll() {
+  if (API_URL) {
+    // Cargar reservas reales desde Google Sheets
+    fetch(API_URL + '?action=bookings')
+      .then(function(r){ return r.json(); })
+      .then(function(res){
+        if (res.ok && res.data) {
+          // Merge con locales
+          const local = getBookings();
+          res.data.forEach(function(b){
+            const idx = local.findIndex(function(l){ return l.id === b.id; });
+            if (idx === -1) local.push(b);
+            else local[idx] = b; // API manda estado actualizado
+          });
+          saveBookings(local);
+        }
+        buildStats(); buildHoy(); buildTablaReservas(); buildTablaEspera();
+      })
+      .catch(function(){
+        buildStats(); buildHoy(); buildTablaReservas(); buildTablaEspera();
+      });
+
+    // Cargar waitlist
+    fetch(API_URL + '?action=waitlist')
+      .then(function(r){ return r.json(); })
+      .then(function(res){
+        if (res.ok && res.data) {
+          const local = getWaitlist();
+          res.data.forEach(function(w){
+            const exists = local.find(function(l){ return l.tel===w.tel && l.fecha===w.fecha && l.hora===w.hora; });
+            if (!exists) local.push(w);
+          });
+          localStorage.setItem('prc_wait', JSON.stringify(local));
+          buildTablaEspera();
+        }
+      }).catch(function(){});
+  } else {
+    buildStats(); buildHoy(); buildTablaReservas(); buildTablaEspera();
+  }
+}
+
+function buildStats() {
+  const bks = getBookings();
+  const today = getTodayStr();
+  const now = new Date();
+  const weekStart = new Date(now);
+  weekStart.setDate(now.getDate() - (now.getDay() === 0 ? 6 : now.getDay()-1));
+
+  const hoy = bks.filter(b => b.fecha === today && b.estado !== 'cancelada').length;
+  const semana = bks.filter(b => b.fecha >= weekStart.toISOString().slice(0,10) && b.estado !== 'cancelada').length;
+  const total = bks.filter(b => b.estado !== 'cancelada').length;
+  const espera = getWaitlist().length;
+
+  document.getElementById('stat-hoy').textContent = hoy;
+  document.getElementById('stat-semana').textContent = semana;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-espera').textContent = espera;
+
+  const d = new Date();
+  document.getElementById('fecha-hoy').textContent = DIAS[d.getDay()] + ' ' + d.getDate() + ' de ' + MESES[d.getMonth()];
+}
+
+function buildHoy() {
+  const today = getTodayStr();
+  const d = new Date(today);
+  const dow = new Date().getDay();
+  const hs = HORARIOS_DIA[dow] || [];
+  const bks = getBookings();
+
+  // Slots
+  let sHtml = '';
+  if (hs.length === 0) {
+    sHtml = '<div class="tslot"><div class="tslot-h">—</div><div class="tslot-info">No hay clases hoy</div></div>';
+  } else {
+    hs.forEach(function(h) {
+      const cnt = bks.filter(b => b.fecha === today && b.hora === h && b.estado !== 'cancelada').length;
+      const disp = MAX_CUPO - cnt;
+      let cls = ''; if (disp===0) cls='full'; else if (disp<=3) cls='few';
+      sHtml += '<div class="tslot '+cls+'">'
+        + '<div class="tslot-h">' + h + ':00</div>'
+        + '<div class="tslot-info">Pilates Reformer</div>'
+        + '<div class="tslot-count">' + cnt + '/' + MAX_CUPO + ' alumnas</div>'
+        + '</div>';
+    });
+  }
+  document.getElementById('today-slots').innerHTML = sHtml;
+
+  // Tabla de hoy
+  const todayBks = bks.filter(b => b.fecha === today).sort(function(a,b){ return a.hora - b.hora; });
+  let tHtml = '';
+  if (todayBks.length === 0) {
+    tHtml = '<tr><td colspan="5"><div class="empty"><div class="empty-ico">📭</div><p>No hay reservas para hoy</p></div></td></tr>';
+  } else {
+    todayBks.forEach(function(b) {
+      tHtml += '<tr>'
+        + '<td>' + b.hora + ':00 hs</td>'
+        + '<td class="td-name">' + b.nombre + '</td>'
+        + '<td>' + (b.telefono||'—') + '</td>'
+        + '<td><span class="badge badge-'+b.estado+'">' + b.estado + '</span></td>'
+        + '<td style="display:flex;gap:6px;flex-wrap:wrap">'
+        + (b.estado==='pendiente'?'<button class="act-btn conf" onclick="confirmar(\''+b.id+'\')">✓ Confirmar</button>':'')
+        + (b.estado!=='cancelada'?'<button class="act-btn canc" onclick="cancelar(\''+b.id+'\')">✕</button>':'')
+        + (b.telefono?'<button class="act-btn wa" onclick="contactarWA(\''+b.telefono+'\',\''+b.nombre+'\')">💬 WA</button>':'')
+        + '</td></tr>';
+    });
+  }
+  document.getElementById('tabla-hoy').innerHTML = tHtml;
+}
+
+function buildTablaReservas() {
+  let bks = getBookings();
+  const buscar = (document.getElementById('buscar')||{}).value || '';
+
+  if (filtroActual !== 'todas') bks = bks.filter(b => b.estado === filtroActual);
+  if (buscar) bks = bks.filter(b => (b.nombre||'').toLowerCase().includes(buscar.toLowerCase()) || (b.telefono||'').includes(buscar));
+
+  bks.sort(function(a,b) { return new Date(b.ts) - new Date(a.ts); });
+
+  let html = '';
+  if (bks.length === 0) {
+    html = '<tr><td colspan="7"><div class="empty"><div class="empty-ico">📭</div><p>No hay reservas</p></div></td></tr>';
+  } else {
+    bks.forEach(function(b) {
+      html += '<tr>'
+        + '<td class="td-fecha">' + fmtFecha(b.fecha) + '</td>'
+        + '<td>' + b.hora + ':00 hs</td>'
+        + '<td class="td-name">' + b.nombre + '</td>'
+        + '<td>' + (b.telefono||'—') + '</td>'
+        + '<td><span class="badge badge-'+b.estado+'">' + b.estado + '</span></td>'
+        + '<td style="color:var(--light);font-size:12px">' + fmtTs(b.ts) + '</td>'
+        + '<td style="display:flex;gap:6px;flex-wrap:wrap">'
+        + (b.estado==='pendiente'?'<button class="act-btn conf" onclick="confirmar(\''+b.id+'\')">✓</button>':'')
+        + (b.estado!=='cancelada'?'<button class="act-btn canc" onclick="cancelar(\''+b.id+'\')">✕</button>':'')
+        + (b.telefono?'<button class="act-btn wa" onclick="contactarWA(\''+b.telefono+'\',\''+b.nombre+'\')">💬</button>':'')
+        + '</td></tr>';
+    });
+  }
+  document.getElementById('tabla-all').innerHTML = html;
+}
+
+function borrarPorFecha() {
+  const desde = document.getElementById('del-desde').value;
+  const hasta = document.getElementById('del-hasta').value;
+  if (!desde || !hasta) { alert('Seleccioná ambas fechas.'); return; }
+  if (!confirm('¿Borrar todas las reservas entre ' + desde + ' y ' + hasta + '? Esta acción no se puede deshacer.')) return;
+  let bks = getBookings();
+  const antes = bks.length;
+  bks = bks.filter(function(b) { return !(b.fecha >= desde && b.fecha <= hasta); });
+  saveBookings(bks);
+  const borradas = antes - bks.length;
+  const res = document.getElementById('del-result');
+  res.style.display = 'block';
+  res.textContent = '✓ Se borraron ' + borradas + ' reserva' + (borradas === 1 ? '' : 's') + ' del período seleccionado.';
+  setTimeout(function() { res.style.display = 'none'; }, 4000);
+  buildAll();
+}
+
+function borrarTodo() {
+  if (!confirm('¿Borrar TODO el historial de reservas? Esta acción es irreversible.')) return;
+  saveBookings([]);
+  const res = document.getElementById('del-result');
+  res.style.display = 'block';
+  res.textContent = '✓ Historial borrado completamente.';
+  setTimeout(function() { res.style.display = 'none'; }, 4000);
+  buildAll();
+}
+
+function buildTablaEspera() {
+  const wl = getWaitlist().sort(function(a,b){ return new Date(b.ts)-new Date(a.ts); });
+  let html = '';
+  if (wl.length === 0) {
+    html = '<tr><td colspan="5"><div class="empty"><div class="empty-ico">🎉</div><p>No hay personas en lista de espera</p></div></td></tr>';
+  } else {
+    wl.forEach(function(w, i) {
+      html += '<tr>'
+        + '<td class="td-fecha">' + fmtFecha(w.fecha) + '</td>'
+        + '<td>' + w.hora + ':00 hs</td>'
+        + '<td>' + (w.tel||'—') + '</td>'
+        + '<td style="color:var(--light);font-size:12px">' + fmtTs(w.ts) + '</td>'
+        + '<td>'
+        + (w.tel?'<button class="act-btn wa" onclick="contactarEspera(\''+w.tel+'\')">💬 Avisar lugar libre</button>':'')
+        + '</td></tr>';
+    });
+  }
+  document.getElementById('tabla-espera').innerHTML = html;
+}
+</script>
+</body>
+</html>
